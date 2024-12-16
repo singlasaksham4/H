@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Broker App (No API)</title>
+  <style>
+    /* CSS */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    .container {
+      text-align: center;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 80%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      color: white;
+      background: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #stockResult {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stock Broker App</h1>
+    <input id="symbolInput" type="text" placeholder="Enter stock symbol (e.g., AAPL)">
+    <button id="searchButton">Search</button>
+    <div id="stockResult">
+      <p>Enter a stock symbol and click search to see details.</p>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript with mock data
+    const mockStockData = {
+      AAPL: { symbol: "AAPL", price: "175.64", change: "+2.35", percentChange: "+1.36%" },
+      TSLA: { symbol: "TSLA", price: "650.23", change: "-5.12", percentChange: "-0.78%" },
+      GOOGL: { symbol: "GOOGL", price: "2802.75", change: "+12.43", percentChange: "+0.45%" },
+      AMZN: { symbol: "AMZN", price: "3405.80", change: "+15.01", percentChange: "+0.44%" }
+    };
+
+    document.getElementById("searchButton").addEventListener("click", () => {
+      const symbol = document.getElementById("symbolInput").value.trim().toUpperCase();
+      const resultDiv = document.getElementById("stockResult");
+
+      // Clear previous results
+      resultDiv.innerHTML = "";
+
+      if (!symbol) {
+        resultDiv.innerHTML = `<p class="error">Please enter a stock symbol!</p>`;
+        return;
+      }
+
+      // Look for the stock in the mock data
+      const stock = mockStockData[symbol];
+      if (stock) {
+        resultDiv.innerHTML = `
+          <p><strong>Symbol:</strong> ${stock.symbol}</p>
+          <p><strong>Price:</strong> $${stock.price}</p>
+          <p><strong>Change:</strong> ${stock.change}</p>
+          <p><strong>Percent Change:</strong> ${stock.percentChange}</p>
+        `;
+      } else {
+        resultDiv.innerHTML = `<p class="error">Stock not found!</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
