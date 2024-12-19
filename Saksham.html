@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fighting Game</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #1e1e1e;
+      overflow: hidden;
+    }
+
+    canvas {
+      border: 2px solid #fff;
+      background-color: #333;
+    }
+
+    .joystick-container {
+      position: absolute;
+      bottom: 50px;
+      left: 50px;
+      width: 120px;
+      height: 120px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #joystick {
+      width: 60px;
+      height: 60px;
+      background-color: #fff;
+      border-radius: 50%;
+      position: relative;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div class="joystick-container">
+    <div id="joystick"></div>
+  </div>
+  <script>
+    // Canvas setup
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Player configuration
+    const player = {
+      x: 100,
+      y: 300,
+      width: 50,
+      height: 100,
+      color: "blue",
+      speed: 2,
+      attacking: false,
+    };
+
+    // Fire sword configuration
+    const sword = {
+      x: player.x + player.width,
+      y: player.y - player.height / 2,
+      width: 20,
+      height: 50,
+      color: "orange",
+      visible: false,
+    };
+
+    // Enemy configuration
+    const enemy = {
+      x: 600,
+      y: 300,
+      width: 50,
+      height: 100,
+      color: "red",
+      health: 100,
+    };
+
+    let joystickState = { dx: 0, dy: 0 };
+
+    // Draw player
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(
+        player.x,
+        player.y - player.height,
+        player.width,
+        player.height
+      );
+    }
+
+    // Draw fire sword
+    function drawSword() {
+      if (sword.visible) {
+        ctx.fillStyle = sword.color;
+        ctx.fillRect(sword.x, sword.y, sword.width, sword.height);
+      }
+    }
+
+    // Draw enemy
+    function drawEnemy() {
+      ctx.fillStyle = enemy.color;
+      ctx.fillRect(
+        enemy.x,
+        enemy.y - enemy.height,
+        enemy.width,
+        enemy.height
+      );
+
+      // Display enemy health
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.fillText(`Health: ${enemy.health}`, enemy.x, enemy.y - enemy.height - 10);
+    }
+
+    // Handle attack
+    function attack() {
+      sword.x = player.x + player.width;
+      sword.y = player.y - player.height / 2;
+      sword.visible = true;
+
+      // Check collision with enemy
+      if (
+        sword.x < enemy.x + enemy.width &&
+        sword.x + sword.width > enemy.x &&
+        sword.y < enemy.y &&
+        sword.y + sword.height > enemy.y - enemy.height
+      ) {
+        enemy.health -= 10;
+
+        if (enemy.health <= 0) {
+          enemy.color = "gray"; // Mark enemy as defeated
+        }
+      }
+
+      // Hide sword after attack
+      setTimeout(() => (sword.visible = false), 300);
+    }
+
+    // Move player
+    function movePlayer() {
+      player.x += joystickState.dx * player.speed;
+      player.y += joystickState.dy * player.speed;
+
+      // Prevent player from leaving canvas boundaries
+      player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+      player.y = Math.max(player.height, Math.min(canvas.height, player.y));
+    }
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawPlayer();
+      drawSword();
+      drawEnemy();
+      movePlayer();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Joystick controls
+    const joystick = document.getElementById("joystick");
+    let joystickActive = false;
+    let startX, startY;
+
+    joystick.addEventListener("touchstart", (e) => {
+      joystickActive = true;
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+    });
+
+    joystick.addEventListener("touchmove", (e) => {
+      if (!joystickActive) return;
+
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 50);
+      const angle = Math.atan2(dy, dx);
+
+      joystickState.dx = Math.cos(angle) * (distance / 50);
+      joystickState.dy = Math.sin(angle) * (distance / 50);
+
+      joystick.style.transform = `translate(${joystickState.dx * 40}px, ${joystickState.dy * 40}px)`;
+    });
+
+    joystick.addEventListener("touchend", () => {
+      joystickActive = false;
+      joystickState = { dx: 0, dy: 0 };
+      joystick.style.transform = `translate(0, 0)`;
+    });
+
+    // Tap to attack
+    canvas.addEventListener("click", () => {
+      attack();
+    });
+
+    // Start game
+    gameLoop();
+  </script>
+</body>
+</html>
